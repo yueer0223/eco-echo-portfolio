@@ -360,14 +360,15 @@ function calcType(answers: Record<number, string>): string {
 const SYSTEM_PROMPT = '你是"音应未来"Eco-Echo非遗数字学者。你精通中国多民族传统音乐——包括彝族、哈尼族、苗族、侗族、蒙古族、藏族、纳西族、羌族、傣族、维吾尔族、土家族等民族的山歌、说唱、戏曲与仪式音乐。你擅于从调式结构、声韵学、人类学田野与AIGC转译等多个维度进行深度分析。请用中文回答，保持专业、诗意且深刻，每次回答控制在200字以内。';
 
 function callAI(messages: { role: string; content: string }[], maxTokens = 400) {
-  const apiKey = import.meta.env.VITE_AI_API_KEY;
-  const endpoint = import.meta.env.VITE_AI_API_ENDPOINT || 'https://api.openai.com/v1/chat/completions';
-  const model = import.meta.env.VITE_AI_MODEL || 'gpt-4o';
-  if (!apiKey) throw new Error('API key not configured');
-  return fetch(endpoint, {
+  return fetch('/api/ai', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
-    body: JSON.stringify({ model, messages, max_tokens: maxTokens, temperature: 0.8 }),
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'deepseek-chat',
+      messages,
+      max_tokens: maxTokens,
+      temperature: 0.8,
+    }),
   });
 }
 
