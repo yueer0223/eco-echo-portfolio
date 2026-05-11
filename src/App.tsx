@@ -4,6 +4,7 @@ import {
   FlaskConical, GraduationCap, LayoutGrid, Music, Disc3,
   Wand2, FileUp, FileAudio, FileVideo, Cloud, X, Check,
 } from 'lucide-react';
+import FlipbookCanvas from './FlipbookCanvas';
 
 // ── Types ────────────────────────────────────────────────────────────
 type View = 'showcase' | 'lab' | 'scholar';
@@ -499,9 +500,15 @@ function App() {
         <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="liquid-glass shrink-0 inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm text-white/80 hover:text-white transition-colors">Explore GitHub <ArrowUpRight size={14} /></a>
       </header>
 
+      {/* ── Flipbook Canvas (standalone banner) ──────────────── */}
+      <div className="shrink-0 mt-4 md:mt-5">
+        <FlipbookCanvas />
+      </div>
+
+      {/* ── Original Bento Grid ──────────────────────────────── */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5 flex-1 min-h-0 mt-4 md:mt-5">
         {/* Col 1 — Archive */}
-        <div className="md:col-span-2 lg:col-span-1 rounded-2xl bg-black overflow-hidden relative flex flex-col min-h-0">
+        <div className="md:col-span-2 lg:col-span-1 rounded-2xl bg-black overflow-hidden relative flex flex-col h-[600px]">
           <div className="absolute z-10 top-4 left-1/2 -translate-x-1/2 flex items-center gap-1.5 text-[11px] text-white/70 tracking-widest"><Sparkles size={12} /> ARCHIVE <Sparkles size={12} /></div>
           <div className="flex-1 overflow-hidden relative" style={{ maskImage: 'linear-gradient(to bottom, transparent, black 10%, black 90%, transparent)', WebkitMaskImage: 'linear-gradient(to bottom, transparent, black 10%, black 90%, transparent)' }}>
             <MarqueeVertical>
@@ -528,7 +535,7 @@ function App() {
         </div>
 
         {/* Col 2 — AI Chat + Stats */}
-        <div className="flex flex-col gap-4 md:gap-5 min-h-0">
+        <div className="flex flex-col gap-4 md:gap-5 h-[600px]">
           <div className="bg-[#324444] rounded-2xl p-5 noise-overlay relative flex flex-col flex-1 min-h-0">
             <div className="flex items-center gap-1.5 text-[11px] text-white/70 tracking-widest mb-3 shrink-0"><Sparkles size={12} /> AI HERITAGE SCHOLAR</div>
             <div className="flex-1 overflow-y-auto min-h-0 pr-1 space-y-3 mb-3">
@@ -567,7 +574,7 @@ function App() {
         </div>
 
         {/* Col 3 — Soul Test + Contact */}
-        <div className="flex flex-col gap-4 md:gap-5 min-h-0">
+        <div className="flex flex-col gap-4 md:gap-5 h-[600px]">
           <div className="bg-black rounded-2xl p-6 noise-overlay relative overflow-hidden flex flex-col flex-1 min-h-0">
             <VideoBackground src={VIDEO_SOURCES.soul} opacity={0.3} />
             <div className="relative z-10 flex flex-col flex-1 min-h-0">
@@ -751,7 +758,7 @@ function App() {
   ];
 
   return (
-    <div className="min-h-screen lg:h-screen flex flex-col bg-[#0a0a0a] text-white font-sans antialiased p-4 sm:p-6 md:p-8 lg:p-10">
+    <div className="min-h-screen overflow-y-auto flex flex-col bg-[#0a0a0a] text-white font-sans antialiased p-4 sm:p-6 md:p-8 lg:p-10">
       {activeView !== 'showcase' && (
         <header className="flex items-center justify-between shrink-0 mb-2">
           <h1 className="text-xl md:text-2xl tracking-tight font-light">Eco-Echo <span className="text-white/40">|</span> <span className="text-white/60">音应未来</span></h1>
