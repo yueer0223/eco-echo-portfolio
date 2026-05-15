@@ -53,7 +53,9 @@ function FadeSlideIn({ id, speed, children }: { id: string | number; speed?: 'no
     const raf = requestAnimationFrame(() => {
       requestAnimationFrame(() => setVisible(true));
     });
-    return () => cancelAnimationFrame(raf);
+    // Fallback: if double-RAF doesn't fire (e.g. tab hidden), force after 100ms
+    const t = setTimeout(() => setVisible(true), 100);
+    return () => { cancelAnimationFrame(raf); clearTimeout(t); };
   }, [id]);
 
   return (
@@ -134,6 +136,16 @@ function VideoBackground({ src, opacity = 0.5 }: { src: string; opacity?: number
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [fallback, setFallback] = useState(false);
 
+  // Pre-set canvas dimensions before paint
+  useLayoutEffect(() => {
+    const c = canvasRef.current;
+    if (!c) return;
+    const w = c.clientWidth || c.parentElement?.clientWidth || 400;
+    const h = c.clientHeight || c.parentElement?.clientHeight || 300;
+    if (w > 0 && c.width !== w) c.width = w;
+    if (h > 0 && c.height !== h) c.height = h;
+  });
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -151,7 +163,6 @@ function VideoBackground({ src, opacity = 0.5 }: { src: string; opacity?: number
     video.autoplay = true;
     video.crossOrigin = 'anonymous';
     video.preload = 'auto';
-    // Hide video off-viewport so X5 / Baidu native player can't find it
     video.style.position = 'fixed';
     video.style.top = '-9999px';
     video.style.left = '-9999px';
@@ -187,7 +198,6 @@ function VideoBackground({ src, opacity = 0.5 }: { src: string; opacity?: number
           framesDrawn++;
         } catch { /* cross-origin may block */ }
       }
-      // If after 3s we haven't drawn any frame, fall back to gradient
       if (!fallback && framesDrawn === 0 && performance.now() - startTime > 3000) {
         setFallback(true);
         killed = true;
@@ -211,16 +221,15 @@ function VideoBackground({ src, opacity = 0.5 }: { src: string; opacity?: number
     };
   }, [src]);
 
-  if (fallback) {
-    return <FallbackGradient opacity={opacity} />;
-  }
-
   return (
-    <canvas
-      ref={canvasRef}
-      className="absolute inset-0 w-full h-full pointer-events-none"
-      style={{ opacity }}
-    />
+    <div className="absolute inset-0">
+      <FallbackGradient opacity={opacity} />
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 w-full h-full pointer-events-none"
+        style={{ opacity: fallback ? 0 : opacity }}
+      />
+    </div>
   );
 }
 
@@ -279,12 +288,36 @@ function PulseGlow({ active, children }: { active: boolean; children: React.Reac
 // ══════════════════════════════════════════════════════════════════════
 
 const archiveItems = [
-  { title: '彝族阿细跳月 — Sampling #01' }, { title: '哈尼海菜腔 — 1080p' },
-  { title: '苗族飞歌 — Field Recording' }, { title: '纳西古乐 — HD Master' },
-  { title: '侗族大歌 — Multitrack' }, { title: '蒙古长调 — Archive #02' },
-  { title: '藏族格萨尔 — 4K Raw' }, { title: '羌族多声部 — Mixdown' },
-  { title: '傣族孔雀舞配乐 — Studio' }, { title: '土家族哭嫁歌 — Field #03' },
-  { title: '维吾尔木卡姆 — Remaster' }, { title: '彝族海菜腔对唱 — 1080p' },
+  { title: '彝族 · 阿细跳月',             path: '/music/archive/a01.mp3' },
+  { title: '哈尼族 · 海菜腔',             path: '/music/archive/a02.mp3' },
+  { title: '苗族 · 飞歌',                 path: '/music/archive/a03.mp3' },
+  { title: '纳西族 · 白沙细乐',           path: '/music/archive/a04.mp3' },
+  { title: '侗族 · 大歌',                 path: '/music/archive/a05.mp3' },
+  { title: '蒙古族 · 长调',               path: '/music/archive/a06.mp3' },
+  { title: '藏族 · 格萨尔王',             path: '/music/archive/a07.mp3' },
+  { title: '羌族 · 多声部',               path: '/music/archive/a08.mp3' },
+  { title: '傣族 · 孔雀舞',               path: '/music/archive/a09.mp3' },
+  { title: '土家族 · 哭嫁歌',             path: '/music/archive/a10.mp3' },
+  { title: '维吾尔族 · 木卡姆',           path: '/music/archive/a11.mp3' },
+  { title: '彝族 · 海菜腔',               path: '/music/archive/a12.mp3' },
+  { title: '回族 · 花儿与少年',           path: '/music/archive/a13.mp3' },
+  { title: '壮族 · 唱山歌',               path: '/music/archive/a14.mp3' },
+  { title: '江南 · 茉莉花',               path: '/music/archive/a15.mp3' },
+  { title: '东乡族 · 白牡丹',             path: '/music/archive/a16.mp3' },
+  { title: '仫佬族 · 婚俗古歌',           path: '/music/archive/a17.mp3' },
+  { title: '佤族 · 加林赛',               path: '/music/archive/a18.mp3' },
+  { title: '土族 · 敬酒歌',               path: '/music/archive/a19.mp3' },
+  { title: '拉祜族 · 快乐拉祜',           path: '/music/archive/a20.mp3' },
+  { title: '柯尔克孜族 · 玛纳斯',         path: '/music/archive/a21.mp3' },
+  { title: '水族 · 弯月如角',             path: '/music/archive/a22.mp3' },
+  { title: '锡伯族 · 多情的眼睛',         path: '/music/archive/a23.mp3' },
+  { title: '黎族 · 五指山歌',             path: '/music/archive/a24.mp3' },
+  { title: '白族 · 大理三月好风光',       path: '/music/archive/a25.mp3' },
+  { title: '布依族 · 好花红',             path: '/music/archive/a26.mp3' },
+  { title: '瑶族 · 瑶族舞曲',             path: '/music/archive/a27.mp3' },
+  { title: '畲族 · 盘瓠传说',             path: '/music/archive/a28.mp3' },
+  { title: '朝鲜族 · 阿里郎',             path: '/music/archive/a29.mp3' },
+  { title: '云南 · 山水隔不断我俩的情',   path: '/music/archive/a30.mp3' },
 ];
 
 const nativeSeeds: NativeSeed[] = [
@@ -376,16 +409,80 @@ function callAI(messages: { role: string; content: string }[], maxTokens = 400) 
 // ── App ───────────────────────────────────────────────────────────────
 // ══════════════════════════════════════════════════════════════════════
 
+// Kill browser scroll restoration — must run before first render
+if ('scrollRestoration' in history) { history.scrollRestoration = 'manual'; }
+
 function App() {
   // Navigation
   const [activeView, setActiveView] = useState<View>('showcase');
+
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  // ── Force scroll-to-top on mount / view switch (delayed) ──────
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    contentRef.current?.scrollTo(0, 0);
+    const tid = setTimeout(() => {
+      window.scrollTo(0, 0);
+      contentRef.current?.scrollTo(0, 0);
+    }, 100);
+    return () => clearTimeout(tid);
+  }, [activeView]);
+
+  // ── Preload video sources + force first-paint reflow ────────────
+  useEffect(() => {
+    // Preload video assets so they're cached before VideoBackground needs them
+    [VIDEO_SOURCES.stats, VIDEO_SOURCES.soul].forEach((url) => {
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      link.as = 'fetch';
+      link.href = url;
+      link.crossOrigin = 'anonymous';
+      document.head.appendChild(link);
+    });
+    // Force a layout recalculation after initial paint settles
+    const tid = setTimeout(() => {
+      document.body.offsetHeight; // trigger reflow
+    }, 120);
+    return () => clearTimeout(tid);
+  }, []);
 
   // Chat
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState('');
   const [chatLoading, setChatLoading] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
-  useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
+  const userHasSent = useRef(false);
+  const archiveAudioRef = useRef<HTMLAudioElement | null>(null);
+  const [nowPlaying, setNowPlaying] = useState('');
+
+  const handleArchivePlay = (path: string, title: string) => {
+    if (archiveAudioRef.current) {
+      archiveAudioRef.current.pause();
+      archiveAudioRef.current.removeAttribute('src');
+      archiveAudioRef.current.load();
+    }
+    const audio = new Audio(path);
+    audio.volume = 0.5;
+    audio.play().catch(() => {});
+    archiveAudioRef.current = audio;
+    setNowPlaying(title);
+  };
+
+  const handleArchivePause = () => {
+    if (archiveAudioRef.current) {
+      archiveAudioRef.current.pause();
+      archiveAudioRef.current.removeAttribute('src');
+      archiveAudioRef.current.load();
+      archiveAudioRef.current = null;
+    }
+    setNowPlaying('');
+  };
+  useEffect(() => {
+    if (userHasSent.current) {
+      chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages]);
 
   // Soul test
   const [testPhase, setTestPhase] = useState<'start' | 'question' | 'result'>('start');
@@ -410,6 +507,7 @@ function App() {
   const handleSend = async () => {
     const text = chatInput.trim();
     if (!text || chatLoading) return;
+    userHasSent.current = true;
     const userMsg: ChatMessage = { role: 'user', text };
     setMessages((prev) => [...prev, userMsg]);
     setChatInput('');
@@ -498,7 +596,6 @@ function App() {
           <h1 className="text-3xl md:text-[40px] tracking-tight font-light leading-none">Eco-Echo <span className="text-white/50">|</span> 音应未来</h1>
           <p className="text-sm md:text-[15px] text-white/60 max-w-3xl mt-2.5 leading-relaxed">A digital ecosystem reviving multi-ethnic folk music through AI and youth co-creation. Led by Yueer, we translate ancient vocal heritage into contemporary resonance.</p>
         </div>
-        <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="liquid-glass shrink-0 inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm text-white/80 hover:text-white transition-colors">Explore GitHub <ArrowUpRight size={14} /></a>
       </header>
 
       {/* ── Flipbook Canvas (standalone banner) ──────────────── */}
@@ -510,21 +607,36 @@ function App() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5 flex-1 min-h-0 mt-4 md:mt-5">
         {/* Col 1 — Archive */}
         <div className="md:col-span-2 lg:col-span-1 rounded-2xl bg-black overflow-hidden relative flex flex-col h-[600px]">
-          <div className="absolute z-10 top-4 left-1/2 -translate-x-1/2 flex items-center gap-1.5 text-[11px] text-white/70 tracking-widest"><Sparkles size={12} /> ARCHIVE <Sparkles size={12} /></div>
+          <div className="absolute z-10 top-4 left-0 right-0 flex flex-col items-center gap-1.5 px-4">
+            <div className="flex items-center gap-2 text-[10px] sm:text-[11px] text-white/70 tracking-widest">
+              <Sparkles size={12} /> ARCHIVE <Sparkles size={12} />
+              {nowPlaying && (
+                <button onClick={(e) => { e.stopPropagation(); handleArchivePause(); }}
+                  className="px-2 py-0.5 rounded-full bg-white/[0.06] border border-white/[0.08] text-white/40 hover:text-white/70 hover:bg-white/[0.1] transition-colors cursor-pointer text-[8px] sm:text-[9px] tracking-widest whitespace-nowrap">
+                  ■ 停
+                </button>
+              )}
+            </div>
+            {nowPlaying && (
+              <p className="text-[9px] text-white/25 tracking-wider truncate max-w-[80%]">
+                正在播放：{nowPlaying}
+              </p>
+            )}
+          </div>
           <div className="flex-1 overflow-hidden relative" style={{ maskImage: 'linear-gradient(to bottom, transparent, black 10%, black 90%, transparent)', WebkitMaskImage: 'linear-gradient(to bottom, transparent, black 10%, black 90%, transparent)' }}>
             <MarqueeVertical>
               <div className="pt-12 pb-12">
                 <div className="flex flex-col gap-2.5 px-4">
                   {archiveItems.map((item, i) => (
-                    <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] transition-colors group shrink-0">
-                      <div className="w-8 h-8 rounded-lg bg-white/[0.08] flex items-center justify-center shrink-0 group-hover:bg-white/[0.15] transition-colors"><Play size={13} className="text-white/70 group-hover:text-white transition-colors" /></div>
-                      <span className="text-[13px] text-white/80 leading-tight">{item.title}</span>
+                    <div key={i} onClick={() => handleArchivePlay(item.path, item.title)} className={`flex items-center gap-3 p-3 rounded-xl border transition-colors group shrink-0 cursor-pointer ${nowPlaying === item.title ? 'bg-white/[0.08] border-white/20' : 'bg-white/[0.03] border-white/[0.06] hover:bg-white/[0.06]'}`}>
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors ${nowPlaying === item.title ? 'bg-white/[0.18]' : 'bg-white/[0.08] group-hover:bg-white/[0.15]'}`}><Play size={13} className={`transition-colors ${nowPlaying === item.title ? 'text-white' : 'text-white/70 group-hover:text-white'}`} /></div>
+                      <span className={`text-[13px] leading-tight ${nowPlaying === item.title ? 'text-white' : 'text-white/80'}`}>{item.title}</span>
                     </div>
                   ))}
                 </div>
                 <div className="flex flex-col gap-2.5 px-4 mt-2.5">
                   {archiveItems.map((item, i) => (
-                    <div key={i + archiveItems.length} className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] transition-colors group shrink-0">
+                    <div key={i + archiveItems.length} onClick={() => handleArchivePlay(item.path, item.title)} className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] transition-colors group shrink-0 cursor-pointer">
                       <div className="w-8 h-8 rounded-lg bg-white/[0.08] flex items-center justify-center shrink-0 group-hover:bg-white/[0.15] transition-colors"><Play size={13} className="text-white/70 group-hover:text-white transition-colors" /></div>
                       <span className="text-[13px] text-white/80 leading-tight">{item.title}</span>
                     </div>
@@ -759,7 +871,7 @@ function App() {
   ];
 
   return (
-    <div className="min-h-screen overflow-y-auto flex flex-col bg-[#0a0a0a] text-white font-sans antialiased p-4 sm:p-6 md:p-8 lg:p-10">
+    <div className="min-h-screen lg:h-screen flex flex-col bg-[#0a0a0a] text-white font-sans antialiased p-4 sm:p-6 md:p-8 lg:p-10">
       {activeView !== 'showcase' && (
         <header className="flex items-center justify-between shrink-0 mb-2">
           <h1 className="text-xl md:text-2xl tracking-tight font-light">Eco-Echo <span className="text-white/40">|</span> <span className="text-white/60">音应未来</span></h1>
@@ -767,7 +879,7 @@ function App() {
         </header>
       )}
 
-      <div className="flex-1 min-h-0 flex flex-col">
+      <div ref={contentRef} className="flex-1 min-h-0 flex flex-col overflow-y-auto">
         {activeView === 'showcase' && renderShowcase()}
         {activeView === 'lab' && renderLab()}
         {activeView === 'scholar' && renderScholar()}
